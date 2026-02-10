@@ -3,243 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Brat Generator Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>Brat Generator</title>
     <style>
         :root {
             --brat-green: #8ace00;
             --bg-dark: #0a0a0a;
             --panel-bg: #161616;
             --input-bg: #222222;
-            --border-color: #333333;
         }
 
         * { 
             box-sizing: border-box; 
             margin: 0; 
             padding: 0; 
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Courier New', Courier, monospace; 
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-dark);
             color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px 15px;
+            padding: 20px;
         }
 
         h1 { 
             margin-bottom: 25px; 
-            font-weight: 800; 
-            letter-spacing: -2px; 
+            font-weight: 900; 
             text-transform: lowercase; 
-            font-size: 2rem;
-            color: var(--brat-green);
+            font-size: 2.2rem; 
+            color: #ffffff; 
+            letter-spacing: -1px; 
         }
 
-        /* --- PREVIEW AREA --- */
-        .canvas-wrapper {
+        /* Area Preview Gambar */
+        .preview-box {
             width: 100%;
-            max-width: 400px;
-            aspect-ratio: 1 / 1;
+            max-width: 380px;
+            aspect-ratio: 1/1;
             margin-bottom: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.6);
+            background: #000;
             border-radius: 4px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
 
-        #canvas-container {
+        #mainCanvas { width: 100%; height: 100%; display: block; }
+
+        /* Panel Kontrol */
+        .panel {
+            background: var(--panel-bg);
             width: 100%;
-            height: 100%;
-            background-color: var(--brat-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        #brat-text {
-            font-family: 'Arial Narrow', 'Arial', sans-serif;
-            color: black;
-            line-height: 1.0;
-            width: 85%;
-            word-break: break-word;
-            transform: scaleY(1.1);
-            text-align: justify; 
-            font-size: 65px;
-            filter: blur(2px);
-            -webkit-filter: blur(2px);
-            pointer-events: none;
-        }
-
-        /* --- CONTROLS PANEL --- */
-        .controls {
-            background-color: var(--panel-bg);
-            padding: 24px;
+            max-width: 380px;
+            padding: 25px;
             border-radius: 24px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #333;
         }
 
-        .control-group { margin-bottom: 20px; }
+        .row { margin-bottom: 20px; }
         
         label { 
             display: block; 
-            margin-bottom: 10px; 
-            font-size: 0.7rem; 
-            color: #888; 
+            font-size: 12px; 
+            color: #aaa; 
             text-transform: uppercase; 
-            letter-spacing: 2px;
-            font-weight: 700;
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            letter-spacing: 1px;
         }
 
         textarea {
             width: 100%;
             background: var(--input-bg);
-            color: white;
-            border: 1px solid var(--border-color);
-            padding: 15px;
-            border-radius: 12px;
-            font-family: inherit;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px; /* Font input diperbesar */
             resize: none;
-            font-size: 16px;
-            transition: border-color 0.2s;
+            outline: none;
         }
         textarea:focus { border-color: var(--brat-green); }
 
-        /* Custom Selector UI */
-        .custom-select {
-            position: relative;
-            width: 100%;
+        .btn-group { display: flex; gap: 8px; margin-top: 8px; }
+        .btn-group button {
+            flex: 1; 
+            padding: 10px; 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            color: #888; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            cursor: pointer; 
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .btn-group button.active { 
+            color: #000; 
+            background: var(--brat-green); 
+            border-color: var(--brat-green); 
         }
 
-        .select-trigger {
-            background: var(--input-bg);
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
+        .color-grid {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
+            gap: 15px;
         }
+        .color-item { flex: 1; }
 
-        .select-trigger .color-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            margin-right: 10px;
-            display: inline-block;
-        }
-
-        .options-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            right: 0;
-            background: #222;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            display: none;
-            z-index: 100;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .options-menu.show { display: block; }
-
-        .option-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-        .option-item:hover { background: #333; }
-        .option-item .color-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            margin-right: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* Sliders */
-        .slider-container { display: flex; gap: 20px; }
-        .slider-item { flex: 1; }
-
+        .sliders { display: flex; gap: 15px; }
+        .sliders div { flex: 1; }
+        
         input[type="range"] { 
             width: 100%; 
             accent-color: var(--brat-green); 
-            height: 35px;
+            cursor: pointer; 
+            height: 25px;
         }
 
-        .btn-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 12px; 
-        }
-        
-        .btn-group button {
-            flex: 1;
-            padding: 12px;
-            background: var(--input-bg);
-            color: #888;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
+        select {
+            width: 100%; 
+            background: var(--input-bg); 
+            color: #fff; 
+            border: 1px solid #444;
+            padding: 12px; 
+            border-radius: 10px; 
+            font-size: 14px;
+            outline: none;
             cursor: pointer;
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: 700;
-            transition: all 0.2s;
-        }
-        .btn-group button.active { 
-            background: #333; 
-            color: var(--brat-green); 
-            border-color: #444;
         }
 
-        /* Download Button with Texture Motif */
-        .btn-download {
-            background-color: var(--brat-green);
-            background-image: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 0);
-            background-size: 6px 6px;
-            color: #000;
-            width: 100%;
-            font-size: 1rem;
-            padding: 20px;
+        .dl-btn {
+            width: 100%; 
+            background: var(--brat-green); 
+            color: #000; 
             border: none;
-            border-radius: 16px;
+            padding: 18px; 
+            border-radius: 15px; 
+            font-weight: 900; 
             cursor: pointer;
-            font-weight: 900;
-            margin-top: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 6px 0px #6a9d00;
+            margin-top: 10px; 
+            text-transform: uppercase; 
+            font-size: 16px; /* Font tombol diperbesar */
+            box-shadow: 0 5px 0 #5d8a00;
             transition: all 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
-        
-        .btn-download:active { 
-            transform: translateY(3px);
-            box-shadow: 0 3px 0px #6a9d00;
-        }
+        .dl-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #5d8a00; }
 
-        #custom-color-input {
-            width: 0; height: 0; visibility: hidden; position: absolute;
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -247,164 +164,161 @@
 
     <h1>brat generator</h1>
 
-    <div class="canvas-wrapper">
-        <div id="canvas-container">
-            <div id="brat-text">brat</div>
-        </div>
+    <div class="preview-box">
+        <canvas id="mainCanvas"></canvas>
     </div>
 
-    <div class="controls">
-        <div class="control-group">
-            <label>Teks</label>
-            <textarea id="input-text" spellcheck="false" rows="2">brat</textarea>
-        </div>
-
-        <div class="control-group">
-            <label>Warna Background</label>
-            <div class="custom-select">
-                <div class="select-trigger" id="select-trigger">
-                    <span><span class="color-dot" id="current-color-dot" style="background:#8ace00"></span> Brat Green</span>
-                    <span>▼</span>
-                </div>
-                <div class="options-menu" id="options-menu">
-                    <div class="option-item" onclick="selectColor('#8ace00', 'Brat Green')">
-                        <span class="color-dot" style="background:#8ace00"></span> Brat Green
-                    </div>
-                    <div class="option-item" onclick="selectColor('#ffffff', 'White')">
-                        <span class="color-dot" style="background:#ffffff"></span> White
-                    </div>
-                    <div class="option-item" onclick="selectColor('#ff69b4', 'Pink')">
-                        <span class="color-dot" style="background:#ff69b4"></span> Pink
-                    </div>
-                    <div class="option-item" onclick="selectColor('#000000', 'Black')">
-                        <span class="color-dot" style="background:#000000"></span> Black
-                    </div>
-                    <div class="option-item" id="custom-color-opt">
-                        <span class="color-dot" style="background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)"></span> Custom Color...
-                    </div>
-                </div>
-            </div>
-            <input type="color" id="custom-color-input">
-        </div>
-
-        <div class="control-group">
-            <label>Posisi</label>
-            <div class="btn-group">
-                <button onclick="setAlign('left', this)">Kiri</button>
-                <button onclick="setAlign('center', this)">Tengah</button>
-                <button class="active" onclick="setAlign('justify', this)">Rata</button>
+    <div class="panel">
+        <div class="row">
+            <label>Tulisan</label>
+            <textarea id="txt" rows="2">brat</textarea>
+            <div class="btn-group" id="alignBtns">
+                <button onclick="setAlign('left')" id="btn-left">Kiri</button>
+                <button onclick="setAlign('center')" id="btn-center">Tengah</button>
+                <button onclick="setAlign('justify')" id="btn-justify" class="active">Rata</button>
             </div>
         </div>
 
-        <div class="slider-container">
-            <div class="control-group slider-item">
-                <label>Ukuran</label>
-                <input type="range" id="size-slider" min="20" max="150" value="65">
+        <div class="color-grid row">
+            <div class="color-item">
+                <label>Warna Latar</label>
+                <select id="bgSelect" onchange="handleBgChange(this.value)">
+                    <option value="#8ace00">Brat Green</option>
+                    <option value="#ffffff">Putih</option>
+                    <option value="#000000">Hitam</option>
+                    <option value="#ff69b4">Pink</option>
+                    <option value="custom">Custom...</option>
+                </select>
+                <input type="color" id="bgColorPicker" style="display:none" oninput="handleBgChange(this.value)">
             </div>
-            <div class="control-group slider-item">
-                <label>Blur</label>
-                <input type="range" id="blur-slider" min="0" max="8" step="0.1" value="2">
+            <div class="color-item">
+                <label>Warna Font</label>
+                <select id="fgSelect" onchange="handleFgChange(this.value)">
+                    <option value="#000000">Hitam</option>
+                    <option value="#ffffff">Putih</option>
+                    <option value="#8ace00">Brat Green</option>
+                    <option value="custom">Custom...</option>
+                </select>
+                <input type="color" id="fgColorPicker" style="display:none" oninput="handleFgChange(this.value)">
             </div>
         </div>
 
-        <button class="btn-download" id="dl-btn" onclick="downloadImage()">
-            Download Gambar
-        </button>
+        <div class="row sliders">
+            <div>
+                <label>Ukuran Font</label>
+                <input type="range" id="size" min="30" max="250" value="100">
+            </div>
+            <div>
+                <label>Efek Blur</label>
+                <input type="range" id="blur" min="0" max="25" step="0.5" value="5">
+            </div>
+        </div>
+
+        <button class="dl-btn" onclick="download()">Download Brat</button>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas-container');
-        const textDisplay = document.getElementById('brat-text');
-        const inputText = document.getElementById('input-text');
-        const dlBtn = document.getElementById('dl-btn');
-        
-        // Custom Select Logic
-        const trigger = document.getElementById('select-trigger');
-        const menu = document.getElementById('options-menu');
-        const currentDot = document.getElementById('current-color-dot');
-        const colorInput = document.getElementById('custom-color-input');
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const RES = 1000;
+        canvas.width = RES; canvas.height = RES;
 
-        trigger.addEventListener('click', () => menu.classList.toggle('show'));
+        let settings = {
+            text: "brat",
+            bg: "#8ace00",
+            fg: "#000000",
+            size: 100,
+            blur: 5,
+            align: 'justify'
+        };
 
-        function selectColor(hex, name) {
-            canvas.style.backgroundColor = hex;
-            dlBtn.style.backgroundColor = hex;
-            dlBtn.style.boxShadow = `0 6px 0px ${shadeColor(hex, -20)}`;
-            currentDot.style.background = hex;
-            trigger.querySelector('span:last-child').previousSibling.textContent = ' ' + name;
-            menu.classList.remove('show');
+        function draw() {
+            // 1. Gambar Background
+            ctx.filter = 'none';
+            ctx.fillStyle = settings.bg;
+            ctx.fillRect(0, 0, RES, RES);
+
+            // 2. Terapkan Filter Blur
+            ctx.filter = `blur(${settings.blur}px)`;
+            ctx.fillStyle = settings.fg;
+            ctx.font = `bold ${settings.size}px Arial, Helvetica, sans-serif`;
+            ctx.textBaseline = "middle";
+
+            const lines = settings.text.split('\n');
+            const lineHeight = settings.size * 0.95;
+            const margin = RES * 0.1;
+            const maxWidth = RES - (margin * 2);
+            let startY = (RES / 2) - ((lines.length - 1) * lineHeight / 2);
+
+            // 3. Render Teks dengan Stretch Vertikal (Efek Brat)
+            ctx.save();
+            ctx.translate(RES/2, RES/2);
+            ctx.scale(0.92, 1.18); // Gaya tipografi album Brat
+            ctx.translate(-RES/2, -RES/2);
+
+            lines.forEach((line, i) => {
+                const y = startY + (i * lineHeight);
+                const words = line.trim().split(/\s+/);
+
+                if (settings.align === 'justify' && words.length > 1) {
+                    const totalWordsWidth = words.reduce((a, w) => a + ctx.measureText(w).width, 0);
+                    const space = (maxWidth - totalWordsWidth) / (words.length - 1);
+                    let curX = margin;
+                    words.forEach(w => {
+                        ctx.fillText(w, curX, y);
+                        curX += ctx.measureText(w).width + space;
+                    });
+                } else {
+                    ctx.textAlign = settings.align === 'justify' ? 'left' : settings.align;
+                    let x = margin;
+                    if (ctx.textAlign === 'center') x = RES / 2;
+                    if (ctx.textAlign === 'right') x = RES - margin;
+                    ctx.fillText(line, x, y);
+                }
+            });
+            ctx.restore();
         }
 
-        document.getElementById('custom-color-opt').addEventListener('click', () => {
-            colorInput.click();
-            menu.classList.remove('show');
-        });
+        // --- Kontrol Event ---
+        document.getElementById('txt').oninput = (e) => { settings.text = e.target.value; draw(); };
+        document.getElementById('size').oninput = (e) => { settings.size = parseInt(e.target.value); draw(); };
+        document.getElementById('blur').oninput = (e) => { settings.blur = parseFloat(e.target.value); draw(); };
 
-        colorInput.addEventListener('input', (e) => {
-            selectColor(e.target.value, 'Custom');
-        });
-
-        // Close menu on outside click
-        window.addEventListener('click', (e) => {
-            if (!trigger.contains(e.target)) menu.classList.remove('show');
-        });
-
-        // Sliders & Text
-        inputText.addEventListener('input', (e) => {
-            textDisplay.innerHTML = e.target.value.replace(/\n/g, '<br>');
-        });
-
-        document.getElementById('size-slider').addEventListener('input', (e) => {
-            textDisplay.style.fontSize = e.target.value + 'px';
-        });
-
-        document.getElementById('blur-slider').addEventListener('input', (e) => {
-            textDisplay.style.filter = `blur(${e.target.value}px)`;
-            textDisplay.style.webkitFilter = `blur(${e.target.value}px)`;
-        });
-
-        function setAlign(align, btn) {
-            textDisplay.style.textAlign = align;
-            textDisplay.style.textAlignLast = (align === 'justify') ? 'left' : 'auto';
-            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function handleBgChange(val) {
+            if (val === 'custom') {
+                document.getElementById('bgColorPicker').click();
+                return;
+            }
+            settings.bg = val;
+            draw();
         }
 
-        // Helper to darken colors for button shadow
-        function shadeColor(color, percent) {
-            let R = parseInt(color.substring(1,3),16);
-            let G = parseInt(color.substring(3,5),16);
-            let B = parseInt(color.substring(5,7),16);
-            R = parseInt(R * (100 + percent) / 100);
-            G = parseInt(G * (100 + percent) / 100);
-            B = parseInt(B * (100 + percent) / 100);
-            R = (R<255)?R:255; G = (G<255)?G:255; B = (B<255)?B:255;
-            let RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-            let GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-            let BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-            return "#"+RR+GG+BB;
+        function handleFgChange(val) {
+            if (val === 'custom') {
+                document.getElementById('fgColorPicker').click();
+                return;
+            }
+            settings.fg = val;
+            draw();
         }
 
-        function downloadImage() {
-            const originalText = dlBtn.innerText;
-            dlBtn.innerText = "Processing...";
-            document.activeElement.blur();
-
-            setTimeout(() => {
-                html2canvas(canvas, {
-                    scale: 1, 
-                    useCORS: true,
-                    width: canvas.offsetWidth,
-                    height: canvas.offsetHeight
-                }).then(c => {
-                    const link = document.createElement('a');
-                    link.download = 'brat-' + Date.now() + '.png';
-                    link.href = c.toDataURL('image/png');
-                    link.click();
-                    dlBtn.innerText = originalText;
-                });
-            }, 100);
+        function setAlign(a) {
+            settings.align = a;
+            document.querySelectorAll('#alignBtns button').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + a).classList.add('active');
+            draw();
         }
+
+        function download() {
+            const link = document.createElement('a');
+            link.download = `brat-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Inisialisasi awal
+        window.onload = draw;
+        draw();
     </script>
 </body>
 </html>
