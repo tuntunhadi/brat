@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Brat Generator</title>
+    <title>Brat Retro</title>
     <style>
         :root {
             --brat-green: #8ace00;
-            --bg-dark: #0a0a0a;
-            --panel-bg: #161616;
-            --input-bg: #222222;
+            --soft-cream: #fdf6e3;
+            --bubblegum: #ff85a1;
+            --sky-blue: #a2d2ff;
+            --text-dark: #2c3e50;
+            --star-yellow: #ffeb3b;
+            --bright-yellow: #ffff00;
         }
 
         * { 
@@ -17,204 +20,341 @@
             margin: 0; 
             padding: 0; 
             font-family: 'Courier New', Courier, monospace; 
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            background-color: var(--bg-dark);
-            color: #ffffff;
+            background-color: var(--soft-cream);
+            background-image: 
+                radial-gradient(var(--sky-blue) 1.5px, transparent 1.5px),
+                linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 25px 25px, 100% 40px;
+            color: var(--text-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 45px 20px 40px 20px;
+            overflow-x: hidden;
         }
 
-        h1 { 
-            margin-bottom: 25px; 
-            font-weight: 900; 
-            text-transform: lowercase; 
-            font-size: 2.2rem; 
-            color: #ffffff; 
-            letter-spacing: -1px; 
+        .deco-item {
+            position: fixed;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+            font-size: 20px;
+            user-select: none;
         }
 
-        /* Area Preview Gambar */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        @media (min-width: 850px) {
+            .main-container {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+            }
+        }
+
+        .title-container {
+            position: relative;
+            margin-bottom: 55px;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .title-container h1 {
+            font-size: 4.5rem;
+            letter-spacing: -7px;
+            color: #000;
+            text-shadow: 4px 4px var(--brat-green);
+            position: relative;
+            z-index: 2;
+        }
+
+        .deco-sticker {
+            position: absolute;
+            background: #fff;
+            border: 2px solid #000;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 50px;
+            white-space: nowrap;
+            box-shadow: 3px 3px 0 #000;
+            z-index: 5;
+        }
+
+        #sticker1 { top: -5px; left: -20px; transform: rotate(-12deg); background: var(--sky-blue); z-index: 3; }
+        #sticker2 { bottom: -10px; right: -25px; transform: rotate(8deg); background: var(--bubblegum); color: #fff; z-index: 1; }
+
+        .window-frame {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 12px;
+            /* Ketebalan shadow disamakan dengan control-panel (8px) */
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.08);
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .win-deco-tl { position: absolute; top: 35px; left: -10px; font-size: 24px; transform: rotate(-20deg); z-index: 6; }
+        .win-deco-br { position: absolute; bottom: -10px; right: -10px; font-size: 28px; transform: rotate(15deg); z-index: 6; }
+
+        .window-bar {
+            background: #000;
+            color: #fff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+        }
+
+        .window-dots { display: flex; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #fff; }
+
         .preview-box {
             width: 100%;
-            max-width: 380px;
             aspect-ratio: 1/1;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.6);
-            background: #000;
-            border-radius: 4px;
-            overflow: hidden;
+            background: #f0f0f0;
         }
 
         #mainCanvas { width: 100%; height: 100%; display: block; }
 
-        /* Panel Kontrol */
-        .panel {
-            background: var(--panel-bg);
+        .control-panel {
             width: 100%;
-            max-width: 380px;
+            max-width: 450px;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
             padding: 25px;
-            border-radius: 24px;
-            border: 1px solid #333;
+            box-shadow: 8px 8px 0px var(--sky-blue);
+            position: relative;
         }
 
-        .row { margin-bottom: 20px; }
+        .panel-label {
+            position: absolute;
+            background: var(--bright-yellow);
+            border: 2px solid #000;
+            padding: 4px 14px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 900;
+            top: -16px;
+            right: 20px;
+            transform: rotate(3deg);
+            box-shadow: 3px 3px 0 #000;
+            color: #000;
+        }
+
+        .field-group { margin-bottom: 18px; }
         
         label { 
-            display: block; 
-            font-size: 12px; 
-            color: #aaa; 
-            text-transform: uppercase; 
-            margin-bottom: 8px; 
-            font-weight: bold; 
-            letter-spacing: 1px;
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
 
         textarea {
             width: 100%;
-            background: var(--input-bg);
-            border: 1px solid #444;
-            color: #fff;
+            border: 3px solid #000;
+            background: #fdfdfd;
             padding: 12px;
-            border-radius: 10px;
-            font-size: 16px; /* Font input diperbesar */
-            resize: none;
+            font-size: 15px;
+            border-radius: 12px;
             outline: none;
+            resize: none;
         }
-        textarea:focus { border-color: var(--brat-green); }
 
-        .btn-group { display: flex; gap: 8px; margin-top: 8px; }
-        .btn-group button {
-            flex: 1; 
-            padding: 10px; 
-            background: #2a2a2a; 
-            border: 1px solid #444; 
-            color: #888; 
-            border-radius: 8px; 
-            font-size: 11px; 
-            cursor: pointer; 
-            text-transform: uppercase;
+        .align-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+        .align-grid button {
+            border: 2px solid #000;
+            background: #fff;
+            padding: 8px;
+            border-radius: 8px;
             font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
         }
-        .btn-group button.active { 
-            color: #000; 
-            background: var(--brat-green); 
-            border-color: var(--brat-green); 
-        }
+        .align-grid button.active { background: var(--bubblegum); color: #fff; box-shadow: 2px 2px 0 #000; }
 
-        .color-grid {
+        .dual-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .color-well {
+            width: 100%;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 5px;
             display: flex;
-            gap: 15px;
+            align-items: center;
+            gap: 8px;
+            background: #f9f9f9;
+            position: relative;
         }
-        .color-item { flex: 1; }
 
-        .sliders { display: flex; gap: 15px; }
-        .sliders div { flex: 1; }
-        
-        input[type="range"] { 
-            width: 100%; 
-            accent-color: var(--brat-green); 
-            cursor: pointer; 
-            height: 25px;
-        }
+        .color-indicator { width: 20px; height: 20px; border: 2px solid #000; border-radius: 50%; }
 
         select {
-            width: 100%; 
-            background: var(--input-bg); 
-            color: #fff; 
-            border: 1px solid #444;
-            padding: 12px; 
-            border-radius: 10px; 
-            font-size: 14px;
+            border: none;
+            background: none;
+            font-size: 11px;
+            font-weight: bold;
+            flex: 1;
             outline: none;
             cursor: pointer;
         }
 
-        .dl-btn {
-            width: 100%; 
-            background: var(--brat-green); 
-            color: #000; 
-            border: none;
-            padding: 18px; 
-            border-radius: 15px; 
-            font-weight: 900; 
-            cursor: pointer;
-            margin-top: 10px; 
-            text-transform: uppercase; 
-            font-size: 16px; /* Font tombol diperbesar */
-            box-shadow: 0 5px 0 #5d8a00;
-            transition: all 0.1s;
-        }
-        .dl-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #5d8a00; }
+        input[type="range"] { width: 100%; accent-color: #000; margin-top: 5px; cursor: pointer; }
 
-        input[type="color"] {
+        .dl-btn {
             width: 100%;
-            height: 40px;
-            border: none;
-            background: none;
+            background: var(--brat-green);
+            color: #000;
+            border: 3px solid #000;
+            padding: 16px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 900;
             cursor: pointer;
+            box-shadow: 5px 5px 0 #000;
+            transition: 0.1s;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
+        .dl-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 #000; }
+
+        /* Ikon Kamera Retro Kustom */
+        .retro-cam-icon {
+            width: 28px;
+            height: 28px;
+        }
+
+        input[type="color"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; top: 0; left: 0; }
     </style>
 </head>
 <body>
 
-    <h1>brat generator</h1>
+    <div class="deco-item" style="top: 5%; left: 5%;">✦</div>
+    <div class="deco-item" style="top: 15%; right: 10%; color: var(--bubblegum);">✿</div>
+    <div class="deco-item" style="top: 40%; left: 2%;">★</div>
+    <div class="deco-item" style="bottom: 10%; left: 8%; color: var(--sky-blue);">✧</div>
+    <div class="deco-item" style="bottom: 25%; right: 5%;">✦</div>
+    <div class="deco-item" style="top: 60%; right: 12%; font-size: 30px;">✿</div>
+    <div class="deco-item" style="bottom: 5%; left: 40%; color: var(--star-yellow);">★</div>
 
-    <div class="preview-box">
-        <canvas id="mainCanvas"></canvas>
+    <div class="title-container">
+        <div id="sticker1" class="deco-sticker">FRESHLY BAKED</div>
+        <h1>brat</h1>
+        <div id="sticker2" class="deco-sticker">RETRO EDITION</div>
     </div>
 
-    <div class="panel">
-        <div class="row">
-            <label>Tulisan</label>
-            <textarea id="txt" rows="2">brat</textarea>
-            <div class="btn-group" id="alignBtns">
-                <button onclick="setAlign('left')" id="btn-left">Kiri</button>
-                <button onclick="setAlign('center')" id="btn-center">Tengah</button>
-                <button onclick="setAlign('justify')" id="btn-justify" class="active">Rata</button>
+    <div class="main-container">
+        <div class="window-frame">
+            <div class="win-deco-tl">✦</div>
+            <div class="window-bar">
+                <div class="window-dots">
+                    <div class="dot" style="background: #ff5f56;"></div>
+                    <div class="dot" style="background: #ffbd2e;"></div>
+                    <div class="dot" style="background: #27c93f;"></div>
+                </div>
+                <span>brat_preview.png</span>
+                <div style="width: 30px;"></div>
             </div>
+            <div class="preview-box">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+            <div class="win-deco-br">✿</div>
         </div>
 
-        <div class="color-grid row">
-            <div class="color-item">
-                <label>Warna Latar</label>
-                <select id="bgSelect" onchange="handleBgChange(this.value)">
-                    <option value="#8ace00">Brat Green</option>
-                    <option value="#ffffff">Putih</option>
-                    <option value="#000000">Hitam</option>
-                    <option value="#ff69b4">Pink</option>
-                    <option value="custom">Custom...</option>
-                </select>
-                <input type="color" id="bgColorPicker" style="display:none" oninput="handleBgChange(this.value)">
+        <div class="control-panel">
+            <div class="panel-label">SETTINGS ★</div>
+            <div class="field-group">
+                <label>✎ KATA-KATA</label>
+                <textarea id="txt" rows="2" placeholder="ketik kata-kata kamu..."></textarea>
+                <div class="align-grid" id="alignBtns">
+                    <button onclick="setAlign('left')" id="btn-left">Kiri</button>
+                    <button onclick="setAlign('center')" id="btn-center">Tengah</button>
+                    <button onclick="setAlign('justify')" id="btn-justify" class="active">Rata</button>
+                </div>
             </div>
-            <div class="color-item">
-                <label>Warna Font</label>
-                <select id="fgSelect" onchange="handleFgChange(this.value)">
-                    <option value="#000000">Hitam</option>
-                    <option value="#ffffff">Putih</option>
-                    <option value="#8ace00">Brat Green</option>
-                    <option value="custom">Custom...</option>
-                </select>
-                <input type="color" id="fgColorPicker" style="display:none" oninput="handleFgChange(this.value)">
-            </div>
-        </div>
 
-        <div class="row sliders">
-            <div>
-                <label>Ukuran Font</label>
-                <input type="range" id="size" min="30" max="250" value="100">
+            <div class="dual-controls field-group">
+                <div>
+                    <label>WARNA BG</label>
+                    <div class="color-well">
+                        <div id="bgCircle" class="color-indicator" style="background: #8ace00;"></div>
+                        <select id="bgSelect" onchange="handleBgChange(this.value)">
+                            <option value="#8ace00">Brat Green</option>
+                            <option value="#ffffff">White</option>
+                            <option value="#ff85a1">Pink</option>
+                            <option value="#a2d2ff">Blue</option>
+                            <option value="#000000">Black</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                        <input type="color" id="bgColorPicker" oninput="updateCustomBg(this.value)">
+                    </div>
+                </div>
+                <div>
+                    <label>WARNA TEKS</label>
+                    <div class="color-well">
+                        <div id="fgCircle" class="color-indicator" style="background: #000000;"></div>
+                        <select id="fgSelect" onchange="handleFgChange(this.value)">
+                            <option value="#000000">Black</option>
+                            <option value="#ffffff">White</option>
+                            <option value="#8ace00">Brat Green</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                        <input type="color" id="fgColorPicker" oninput="updateCustomFg(this.value)">
+                    </div>
+                </div>
             </div>
-            <div>
-                <label>Efek Blur</label>
-                <input type="range" id="blur" min="0" max="25" step="0.5" value="5">
-            </div>
-        </div>
 
-        <button class="dl-btn" onclick="download()">Download Brat</button>
+            <div class="dual-controls field-group">
+                <div>
+                    <label>FONT SIZE</label>
+                    <input type="range" id="size" min="40" max="380" value="95" onmousedown="forceBlur()" ontouchstart="forceBlur()">
+                </div>
+                <div>
+                    <label>BLUR LEVEL</label>
+                    <input type="range" id="blur" min="0" max="15" step="0.5" value="4" onmousedown="forceBlur()" ontouchstart="forceBlur()">
+                </div>
+            </div>
+
+            <button class="dl-btn" onclick="download()">
+                SAVE IMAGE
+                <svg class="retro-cam-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Body Kamera -->
+                    <rect x="4" y="10" width="32" height="22" rx="3" stroke="black" stroke-width="3"/>
+                    <!-- Lensa -->
+                    <circle cx="20" cy="21" r="6" stroke="black" stroke-width="3"/>
+                    <circle cx="20" cy="21" r="2" fill="black"/>
+                    <!-- Flash/Viewfinder -->
+                    <rect x="8" y="6" width="10" height="4" rx="1" stroke="black" stroke-width="2"/>
+                    <circle cx="31" cy="14" r="1.5" fill="black"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <script>
@@ -223,86 +363,128 @@
         const RES = 1000;
         canvas.width = RES; canvas.height = RES;
 
+        const SX = 0.92; 
+        const SY = 1.18;
+
         let settings = {
-            text: "brat",
+            text: "",
             bg: "#8ace00",
             fg: "#000000",
-            size: 100,
-            blur: 5,
+            size: 95,
+            blur: 4,
             align: 'justify'
         };
 
+        function forceBlur() {
+            document.getElementById('txt').blur();
+        }
+
+        function wrapText(context, text, maxWidth) {
+            if (!text) return [""];
+            let lines = [];
+            let paragraphs = text.split('\n');
+            paragraphs.forEach(p => {
+                let words = p.split(' ');
+                let currentLine = '';
+                words.forEach(word => {
+                    let testLine = currentLine + (currentLine ? ' ' : '') + word;
+                    let testWidth = context.measureText(testLine).width * SX;
+                    if (testWidth <= maxWidth) {
+                        currentLine = testLine;
+                    } else {
+                        if (currentLine) lines.push(currentLine);
+                        let wordWidth = context.measureText(word).width * SX;
+                        if (wordWidth > maxWidth) {
+                            let chars = word.split('');
+                            let temp = '';
+                            chars.forEach(char => {
+                                if (context.measureText(temp + char).width * SX <= maxWidth) {
+                                    temp += char;
+                                } else {
+                                    lines.push(temp);
+                                    temp = char;
+                                }
+                            });
+                            currentLine = temp;
+                        } else {
+                            currentLine = word;
+                        }
+                    }
+                });
+                lines.push(currentLine);
+            });
+            return lines;
+        }
+
         function draw() {
-            // 1. Gambar Background
             ctx.filter = 'none';
             ctx.fillStyle = settings.bg;
             ctx.fillRect(0, 0, RES, RES);
 
-            // 2. Terapkan Filter Blur
+            if (!settings.text.trim()) return;
+
+            ctx.font = `bold ${settings.size}px Arial, Helvetica, sans-serif`;
+            const margin = RES * 0.09; 
+            const maxWidth = RES - (margin * 2);
+
+            const finalLines = wrapText(ctx, settings.text, maxWidth);
+            const lineHeight = settings.size * 1.05;
+            let totalHeight = finalLines.length * lineHeight;
+            let startY = (RES / 2) - (totalHeight / 2) + (lineHeight / 2);
+
             ctx.filter = `blur(${settings.blur}px)`;
             ctx.fillStyle = settings.fg;
-            ctx.font = `bold ${settings.size}px Arial, Helvetica, sans-serif`;
             ctx.textBaseline = "middle";
 
-            const lines = settings.text.split('\n');
-            const lineHeight = settings.size * 0.95;
-            const margin = RES * 0.1;
-            const maxWidth = RES - (margin * 2);
-            let startY = (RES / 2) - ((lines.length - 1) * lineHeight / 2);
-
-            // 3. Render Teks dengan Stretch Vertikal (Efek Brat)
             ctx.save();
             ctx.translate(RES/2, RES/2);
-            ctx.scale(0.92, 1.18); // Gaya tipografi album Brat
+            ctx.scale(SX, SY); 
             ctx.translate(-RES/2, -RES/2);
 
-            lines.forEach((line, i) => {
+            finalLines.forEach((line, i) => {
+                if (!line) return;
                 const y = startY + (i * lineHeight);
                 const words = line.trim().split(/\s+/);
 
-                if (settings.align === 'justify' && words.length > 1) {
+                if (settings.align === 'justify' && words.length > 1 && i !== finalLines.length - 1) {
                     const totalWordsWidth = words.reduce((a, w) => a + ctx.measureText(w).width, 0);
-                    const space = (maxWidth - totalWordsWidth) / (words.length - 1);
-                    let curX = margin;
+                    const space = (maxWidth / SX - totalWordsWidth) / (words.length - 1);
+                    let curX = margin / SX;
                     words.forEach(w => {
                         ctx.fillText(w, curX, y);
                         curX += ctx.measureText(w).width + space;
                     });
                 } else {
-                    ctx.textAlign = settings.align === 'justify' ? 'left' : settings.align;
-                    let x = margin;
-                    if (ctx.textAlign === 'center') x = RES / 2;
-                    if (ctx.textAlign === 'right') x = RES - margin;
+                    ctx.textAlign = (settings.align === 'justify') ? 'left' : settings.align;
+                    let x = margin / SX;
+                    if (ctx.textAlign === 'center') x = (RES / 2) / SX;
+                    if (ctx.textAlign === 'right') x = (RES - margin) / SX;
                     ctx.fillText(line, x, y);
                 }
             });
             ctx.restore();
         }
 
-        // --- Kontrol Event ---
         document.getElementById('txt').oninput = (e) => { settings.text = e.target.value; draw(); };
         document.getElementById('size').oninput = (e) => { settings.size = parseInt(e.target.value); draw(); };
         document.getElementById('blur').oninput = (e) => { settings.blur = parseFloat(e.target.value); draw(); };
 
         function handleBgChange(val) {
-            if (val === 'custom') {
-                document.getElementById('bgColorPicker').click();
-                return;
-            }
-            settings.bg = val;
-            draw();
+            forceBlur();
+            if (val === 'custom') document.getElementById('bgColorPicker').click();
+            else { settings.bg = val; document.getElementById('bgCircle').style.background = val; draw(); }
         }
+        function updateCustomBg(val) { settings.bg = val; document.getElementById('bgCircle').style.background = val; draw(); }
 
         function handleFgChange(val) {
-            if (val === 'custom') {
-                document.getElementById('fgColorPicker').click();
-                return;
-            }
-            settings.fg = val;
-            draw();
+            forceBlur();
+            if (val === 'custom') document.getElementById('fgColorPicker').click();
+            else { settings.fg = val; document.getElementById('fgCircle').style.background = val; draw(); }
         }
+        function updateCustomFg(val) { settings.fg = val; document.getElementById('fgCircle').style.background = val; draw(); }
 
         function setAlign(a) {
+            forceBlur();
             settings.align = a;
             document.querySelectorAll('#alignBtns button').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-' + a).classList.add('active');
@@ -310,15 +492,14 @@
         }
 
         function download() {
+            forceBlur();
             const link = document.createElement('a');
-            link.download = `brat-${Date.now()}.png`;
+            link.download = `brat-style-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
 
-        // Inisialisasi awal
         window.onload = draw;
-        draw();
     </script>
 </body>
 </html>
