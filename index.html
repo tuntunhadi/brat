@@ -103,7 +103,6 @@
             background: #fff;
             border: 3px solid #000;
             border-radius: 12px;
-            /* Ketebalan shadow disamakan dengan control-panel (8px) */
             box-shadow: 8px 8px 0px rgba(0,0,0,0.08);
             overflow: hidden;
             flex-shrink: 0;
@@ -244,7 +243,7 @@
         }
         .dl-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 #000; }
 
-        /* Ikon Kamera Retro Kustom */
+        /* Retro Camera Icon Custom */
         .retro-cam-icon {
             width: 28px;
             height: 28px;
@@ -388,17 +387,18 @@
                 let currentLine = '';
                 words.forEach(word => {
                     let testLine = currentLine + (currentLine ? ' ' : '') + word;
-                    let testWidth = context.measureText(testLine).width * SX;
+                    // Gunakan lebar aktual tanpa faktor skala SX untuk membungkus teks agar presisi
+                    let testWidth = context.measureText(testLine).width;
                     if (testWidth <= maxWidth) {
                         currentLine = testLine;
                     } else {
                         if (currentLine) lines.push(currentLine);
-                        let wordWidth = context.measureText(word).width * SX;
+                        let wordWidth = context.measureText(word).width;
                         if (wordWidth > maxWidth) {
                             let chars = word.split('');
                             let temp = '';
                             chars.forEach(char => {
-                                if (context.measureText(temp + char).width * SX <= maxWidth) {
+                                if (context.measureText(temp + char).width <= maxWidth) {
                                     temp += char;
                                 } else {
                                     lines.push(temp);
@@ -424,6 +424,8 @@
             if (!settings.text.trim()) return;
 
             ctx.font = `bold ${settings.size}px Arial, Helvetica, sans-serif`;
+            
+            // Definisikan margin dasar dalam koordinat asli canvas (sebelum skala)
             const margin = RES * 0.09; 
             const maxWidth = RES - (margin * 2);
 
@@ -437,6 +439,7 @@
             ctx.textBaseline = "middle";
 
             ctx.save();
+            // Terapkan skala ke arah pusat canvas
             ctx.translate(RES/2, RES/2);
             ctx.scale(SX, SY); 
             ctx.translate(-RES/2, -RES/2);
@@ -446,20 +449,27 @@
                 const y = startY + (i * lineHeight);
                 const words = line.trim().split(/\s+/);
 
+                // Logika Penyelarasan (Alignment)
                 if (settings.align === 'justify' && words.length > 1 && i !== finalLines.length - 1) {
                     const totalWordsWidth = words.reduce((a, w) => a + ctx.measureText(w).width, 0);
-                    const space = (maxWidth / SX - totalWordsWidth) / (words.length - 1);
-                    let curX = margin / SX;
+                    // Hitung spasi antar kata agar baris tepat mengisi maxWidth
+                    const space = (maxWidth - totalWordsWidth) / (words.length - 1);
+                    let curX = margin;
+                    ctx.textAlign = 'left';
                     words.forEach(w => {
                         ctx.fillText(w, curX, y);
                         curX += ctx.measureText(w).width + space;
                     });
                 } else {
-                    ctx.textAlign = (settings.align === 'justify') ? 'left' : settings.align;
-                    let x = margin / SX;
-                    if (ctx.textAlign === 'center') x = (RES / 2) / SX;
-                    if (ctx.textAlign === 'right') x = (RES - margin) / SX;
-                    ctx.fillText(line, x, y);
+                    // Penyelarasan standar (Left, Center)
+                    if (settings.align === 'center') {
+                        ctx.textAlign = 'center';
+                        ctx.fillText(line, RES / 2, y);
+                    } else {
+                        // Untuk justify baris terakhir atau mode 'left', margin kiri selalu sama
+                        ctx.textAlign = 'left';
+                        ctx.fillText(line, margin, y);
+                    }
                 }
             });
             ctx.restore();
