@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brat Generator V2 (Multi Color)</title>
+    <!-- Library untuk download gambar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* --- RESET & BASIC UI --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #121212; /* Dark Mode UI */
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 20px; font-weight: normal; letter-spacing: -1px; text-transform: lowercase; }
+
+        /* --- CANVAS AREA --- */
+        .preview-wrapper {
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid #333;
+        }
+
+        #canvas-container {
+            width: 500px; /* Resolusi Dasar */
+            height: 500px;
+            background-color: #8ace00; /* Default Brat Green */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        #brat-text {
+            font-family: 'Arial Narrow', 'Arial', sans-serif;
+            color: black;
+            line-height: 1.05;
+            width: 85%;
+            word-break: break-word;
+            transform: scaleY(1.1); /* Stretch effect */
+            text-align: justify; /* Default Rata Kiri Kanan */
+            font-size: 90px;
+            filter: blur(2px); /* Default Blur Effect */
+        }
+
+        /* --- CONTROL PANEL --- */
+        .controls {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #333;
+        }
+
+        .control-group { margin-bottom: 20px; }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Input Text Area */
+        textarea {
+            width: 100%;
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            font-size: 1rem;
+        }
+
+        /* Color Pickers */
+        .color-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .swatch {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .swatch:hover { transform: scale(1.1); }
+        .swatch.active { border-color: white; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        /* Custom Color Input */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: none;
+            cursor: pointer;
+        }
+
+        /* Text Color Toggle */
+        .text-color-btn {
+            padding: 8px 15px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .text-color-btn.active { background: #555; border-color: #777; }
+
+        /* Sliders */
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #8ace00;
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 8px; margin-bottom: 15px; }
+        
+        button.action-btn {
+            flex: 1;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        button.action-btn.active { background: #555; color: #8ace00; }
+
+        .btn-download {
+            width: 100%;
+            background-color: #8ace00; /* Tombol ikut warna tema */
+            color: black;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-download:hover { opacity: 0.9; }
+
+        /* Mobile Responsive */
+        @media (max-width: 550px) {
+            #canvas-container { width: 340px; height: 340px; }
+            #brat-text { font-size: 60px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>brat generator</h1>
+
+    <!-- Area Gambar -->
+    <div class="preview-wrapper">
+        <div id="canvas-container">
+            <div id="brat-text">brat</div>
+        </div>
+    </div>
+
+    <!-- Kontrol -->
+    <div class="controls">
+        
+        <!-- Input Teks -->
+        <div class="control-group">
+            <label>Tulisan</label>
+            <textarea id="input-text" placeholder="Ketik sesuatu...">brat</textarea>
+        </div>
+
+        <!-- Pilihan Warna Background -->
+        <div class="control-group">
+            <label>Warna Background</label>
+            <div class="color-options">
+                <!-- Preset Colors -->
+                <div class="swatch active" style="background-color: #8ace00;" onclick="changeBg('#8ace00', this)" title="Original Brat"></div>
+                <div class="swatch" style="background-color: #ffffff;" onclick="changeBg('#ffffff', this)" title="Putih/Deluxe"></div>
+                <div class="swatch" style="background-color: #ff69b4;" onclick="changeBg('#ff69b4', this)" title="Pink"></div>
+                <div class="swatch" style="background-color: #00bfff;" onclick="changeBg('#00bfff', this)" title="Biru"></div>
+                <div class="swatch" style="background-color: #000000;" onclick="changeBg('#000000', this)" title="Hitam"></div>
+                
+                <!-- Custom Color Picker -->
+                <input type="color" id="custom-color" value="#8ace00" oninput="changeBg(this.value, null)">
+            </div>
+        </div>
+
+        <!-- Pilihan Warna Teks -->
+        <div class="control-group">
+            <label>Warna Teks</label>
+            <div style="display: flex; gap: 10px;">
+                <button class="text-color-btn active" onclick="changeTextColor('black', this)">Hitam</button>
+                <button class="text-color-btn" onclick="changeTextColor('white', this)">Putih</button>
+            </div>
+        </div>
+
+        <!-- Slider Ukuran & Blur -->
+        <div class="control-group">
+            <label>Ukuran Font</label>
+            <input type="range" id="size-slider" min="20" max="250" value="90">
+        </div>
+
+        <div class="control-group">
+            <label>Efek Buram (Blur)</label>
+            <input type="range" id="blur-slider" min="0" max="8" step="0.1" value="2">
+        </div>
+
+        <!-- Alignment -->
+        <div class="control-group">
+            <label>Posisi Teks</label>
+            <div class="btn-group">
+                <button class="action-btn" onclick="setAlign('left', this)">Kiri</button>
+                <button class="action-btn" onclick="setAlign('center', this)">Tengah</button>
+                <button class="action-btn active" onclick="setAlign('justify', this)">Rata Kanan-Kiri</button>
+            </div>
+        </div>
+
+        <button class="btn-download" id="download-btn" onclick="downloadImage()">Download Gambar</button>
+    </div>
+
+    <script>
+        // Elemen DOM
+        const canvas = document.getElementById('canvas-container');
+        const textDisplay = document.getElementById('brat-text');
+        const inputText = document.getElementById('input-text');
+        const customColorInput = document.getElementById('custom-color');
+        const downloadBtn = document.getElementById('download-btn');
+
+        // State saat ini
+        let currentBgColor = '#8ace00';
+
+        // 1. Update Teks Realtime
+        inputText.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/\n/g, '<br>');
+            textDisplay.innerHTML = val;
+        });
+
+        // 2. Ganti Background
+        function changeBg(color, element) {
+            currentBgColor = color;
+            canvas.style.backgroundColor = color;
+            customColorInput.value = color; // Sync color picker
+            downloadBtn.style.backgroundColor = color; // Tombol download ikut berubah warna
+            
+            // Ubah warna teks tombol download biar kontras
+            // Rumus simpel: kalau hex gelap, teks putih.
+            if(color === '#000000' || color === '#121212') {
+                downloadBtn.style.color = 'white';
+            } else {
+                downloadBtn.style.color = 'black';
+            }
+
+            // Update UI Swatch Active
+            if (element) {
+                document.querySelectorAll('.swatch').forEach(el => el.classList.remove('active'));
+                element.classList.add('active');
+            } else {
+                document.querySelectorAll('.swatch').forEach(el => el.classList.remove('active'));
+            }
+        }
+
+        // 3. Ganti Warna Teks
+        function changeTextColor(color, btn) {
+            textDisplay.style.color = color;
+            document.querySelectorAll('.text-color-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // 4. Sliders (Font & Blur)
+        document.getElementById('size-slider').addEventListener('input', (e) => {
+            textDisplay.style.fontSize = e.target.value + 'px';
+        });
+
+        document.getElementById('blur-slider').addEventListener('input', (e) => {
+            textDisplay.style.filter = `blur(${e.target.value}px)`;
+        });
+
+        // 5. Alignment
+        function setAlign(align, btn) {
+            textDisplay.style.textAlign = align;
+            if (align === 'justify') {
+                textDisplay.style.textAlignLast = 'left';
+            } else {
+                textDisplay.style.textAlignLast = 'auto';
+            }
+            
+            document.querySelectorAll('.btn-group .action-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // 6. Download Function
+        function downloadImage() {
+            const btnOriginalText = downloadBtn.innerText;
+            downloadBtn.innerText = "Memproses...";
+            
+            html2canvas(canvas, {
+                scale: 2, // High Res
+                backgroundColor: currentBgColor, // Paksa warna background saat ini
+                logging: false,
+                useCORS: true
+            }).then(c => {
+                const link = document.createElement('a');
+                link.download = `brat-${Date.now()}.png`;
+                link.href = c.toDataURL('image/png');
+                link.click();
+                downloadBtn.innerText = btnOriginalText;
+            });
+        }
+    </script>
+</body>
+</html>
+
